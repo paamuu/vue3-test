@@ -1,29 +1,40 @@
 <script setup>
 import { ref } from 'vue'
 
-// 树节点数据（初始化时就有多级节点，并全部展开）
+// 初始化时就存在的多级树节点数据，并全部展开
+// 其中部分节点支持后续懒加载（hasLazy: true）
 const treeData = ref([
   {
     id: 1,
     label: '节点 1',
     hasLazy: true,
     children: [
-      // hasLazy 为 true 且当前没有 children，需要显示展开图标，所以显式标记 isLeaf 为 false
-      { id: 11, label: '节点 1-1', hasLazy: true, isLeaf: false,children:[{
-        id: 11-1, label: '节点 1-1-2'
-      }] },
-      { id: 12, label: '节点 1-2' },
+      {
+        id: 11,
+        label: '节点 1-1（可继续懒加载）',
+        hasLazy: true,
+        // 初始没有 children，但需要显示展开图标，所以显式标记为非叶子
+        isLeaf: false,
+      },
+      {
+        id: 12,
+        label: '节点 1-2',
+        children: [
+          { id: 121, label: '节点 1-2-1' },
+          { id: 122, label: '节点 1-2-2' },
+        ],
+      },
     ],
   },
   {
     id: 2,
-    label: '节点 2',
+    label: '节点 2（本身有子节点，也可以再懒加载）',
     hasLazy: true,
     children: [
       { id: 21, label: '节点 2-1' },
       {
         id: 22,
-        label: '节点 2-2',
+        label: '节点 2-2（可继续懒加载）',
         hasLazy: true,
         children: [{ id: 221, label: '节点 2-2-1' }],
       },
@@ -32,7 +43,10 @@ const treeData = ref([
   {
     id: 3,
     label: '节点 3',
-    children: [{ id: 31, label: '节点 3-1' }],
+    children: [
+      { id: 31, label: '节点 3-1' },
+      { id: 32, label: '节点 3-2' },
+    ],
   },
 ])
 
@@ -70,8 +84,7 @@ const loadChildren = (parent) => {
 
 // 点击节点（仅触发点击事件，不做懒加载）
 const handleNodeClick = (data) => {
-  // 这里按需处理节点点击事件，例如高亮、右侧详情等
-  // 目前示例中仅简单打印
+  // 这里可以处理节点点击，如右侧详情、高亮等
   console.log('node click:', data)
 }
 
@@ -85,7 +98,7 @@ const handleNodeExpand = async (data) => {
 
   const children = await loadChildren(data)
 
-  if (!children || !children.length || !treeRef.value) return
+  if (!children?.length || !treeRef.value) return
 
   // 使用 el-tree 暴露的 append 方法，将新子节点挂到当前节点下
   children.forEach((child) => {
@@ -102,6 +115,7 @@ const handleNodeExpand = async (data) => {
       node-key="id"
       default-expand-all
       :props="defaultProps"
+      :expand-on-click-node="false"
       @node-click="handleNodeClick"
       @node-expand="handleNodeExpand"
     />

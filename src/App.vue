@@ -1,10 +1,13 @@
 <script setup>
 import TreeLazyDemo from './components/TreeLazyDemo.vue'
+import TreeLazyIconLazyDemo from './components/TreeLazyIconLazyDemo.vue'
+import TreeLazyDefaultExpanded from './components/TreeLazyDefaultExpanded.vue'
 </script>
 
 <template>
   <main class="app-main">
-    <TreeLazyDemo />
+    <!-- <TreeLazyDemo /> -->
+    <TreeLazyDefaultExpanded />
   </main>
 </template>
 
